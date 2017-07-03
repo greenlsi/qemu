@@ -26,6 +26,9 @@
 #include "hw/timer/bcm2835_st.h"
 #include "hw/timer/bcm2835_timer.h"
 #include "hw/usb/bcm2835_usb.h"
+#include "hw/gpio/bcm2835_gpio.h"
+#include "hw/ssi/max1246_spi.h"
+
 
 #define TYPE_BCM2835_PERIPHERALS "bcm2835-peripherals"
 #define BCM2835_PERIPHERALS(obj) \
@@ -53,6 +56,8 @@ typedef struct BCM2835PeripheralState {
     BCM2835StState st;
     BCM2835TimerState timer;
     BCM2835UsbState usb;
+    bcm2835_gpif_s gpio;
+    max1246_spi_s adc;
 } BCM2835PeripheralState;
 
 #endif /* BCM2835_PERIPHERALS_H */

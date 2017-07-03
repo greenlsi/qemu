@@ -17,3 +17,15 @@ obj-$(CONFIG_XLNX_ZYNQMP) += xlnx-zynqmp.o xlnx-ep108.o
 obj-$(CONFIG_FSL_IMX25) += fsl-imx25.o imx25_pdk.o
 obj-$(CONFIG_FSL_IMX31) += fsl-imx31.o kzm.o
 obj-$(CONFIG_ASPEED_SOC) += ast2400.o palmetto-bmc.o
+
+bcm2835.o-libs += -L/usr/local/lib -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+bcm2835.o-cflags += -pthread -I/usr/local/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+
+bcm2835_peripherals.o-libs += -L/usr/local/lib -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+bcm2835_peripherals.o-cflags += -pthread -I/usr/local/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+
+bcm2836.o-libs += -L/usr/local/lib -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+bcm2836.o-cflags += -pthread -I/usr/local/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+
+raspi.o-libs += -L/usr/local/lib -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+raspi.o-cflags += -pthread -I/usr/local/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include

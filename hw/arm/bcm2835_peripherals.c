@@ -14,6 +14,8 @@
 #include "hw/arm/raspi_platform.h"
 #include "sysemu/char.h"
 
+#define DBGprintf(format, ...) printf("%s:%d:%s: " format, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
 /* Peripheral base address on the VC (GPU) system bus */
 #define BCM2835_VC_PERI_BASE 0x7e000000
 
@@ -22,6 +24,8 @@
 
 static void bcm2835_peripherals_init(Object *obj)
 {
+    printf("Peripherals initialized \n");
+
     BCM2835PeripheralState *s = BCM2835_PERIPHERALS(obj);
 
     /* Memory region for peripheral devices, which we export to our parent */
@@ -124,6 +128,24 @@ static void bcm2835_peripherals_init(Object *obj)
 
     object_property_add_const_link(OBJECT(&s->dma), "dma-mr",
                                    OBJECT(&s->gpu_bus_mr), &error_abort);
+
+    /* GPIO */
+    DBGprintf("%lu, 0x%08llX\n", sizeof(s->gpio), (unsigned long long)(&s->gpio));
+    object_initialize(&s->gpio, sizeof(s->gpio), TYPE_BCM2835_GPIO);
+    DBGprintf("%s", "\n");
+    object_property_add_child(obj, "gpio", OBJECT(&s->gpio), NULL);
+    DBGprintf("%s", "\n");
+    qdev_set_parent_bus(DEVICE(&s->gpio), sysbus_get_default());
+
+    /* ADC MAX1246 */
+    DBGprintf("%lu, 0x%08llX\n", sizeof(s->adc), (unsigned long long)(&s->adc));
+    object_initialize(&s->adc, sizeof(s->adc), TYPE_MAX1246_SPI);
+    DBGprintf("%s", "\n");
+    object_property_add_child(obj, "adc", OBJECT(&s->adc), NULL);
+    DBGprintf("%s", "\n");
+    qdev_set_parent_bus(DEVICE(&s->adc), sysbus_get_default());
+    DBGprintf("%s", "\n");
+
 }
 
 static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
@@ -385,6 +407,39 @@ static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
                                                   BCM2835_IC_GPU_IRQ,
                                                   INTERRUPT_DMA0 + n));
     }
+
+    /* GPIO */
+    object_property_set_bool(OBJECT(&s->gpio), true, "realized", &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+
+    memory_region_add_subregion(&s->peri_mr, GPIO_OFFSET,
+                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->gpio), 0));
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 0,
+        qdev_get_gpio_in_named(DEVICE(&s->ic), BCM2835_IC_GPU_IRQ, INTERRUPT_GPIO0));
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 1,
+        qdev_get_gpio_in_named(DEVICE(&s->ic), BCM2835_IC_GPU_IRQ, INTERRUPT_GPIO1));
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 2,
+        qdev_get_gpio_in_named(DEVICE(&s->ic), BCM2835_IC_GPU_IRQ, INTERRUPT_GPIO2));
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 3,
+        qdev_get_gpio_in_named(DEVICE(&s->ic), BCM2835_IC_GPU_IRQ, INTERRUPT_GPIO3));
+
+    /* ADC MAX1246 */
+    object_property_set_bool(OBJECT(&s->adc), true, "realized", &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+
+    memory_region_add_subregion(&s->peri_mr, SPI0_OFFSET,
+                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->adc), 0));
+    
+
+
+
+
 }
 
 static void bcm2835_peripherals_class_init(ObjectClass *oc, void *data)

@@ -196,6 +196,8 @@ static void bcm2835_ic_init(Object *obj)
 
     sysbus_init_irq(SYS_BUS_DEVICE(s), &s->irq);
     sysbus_init_irq(SYS_BUS_DEVICE(s), &s->fiq);
+    printf("Interrupt Controler bcm2835_ic INIT \n");
+
 }
 
 static const VMStateDescription vmstate_bcm2835_ic = {
@@ -232,6 +234,7 @@ static TypeInfo bcm2835_ic_info = {
 static void bcm2835_ic_register_types(void)
 {
     type_register_static(&bcm2835_ic_info);
+    printf("bcm2835_ic Register \n");
 }
 
 type_init(bcm2835_ic_register_types)

@@ -231,6 +231,7 @@ struct omap2_gpif_s {
 static inline void omap2_gpio_module_int_update(struct omap2_gpio_s *s,
                                                 int line)
 {
+
     qemu_set_irq(s->irq[line], s->ints[line] & s->mask[line]);
 }
 
@@ -526,6 +527,7 @@ static void omap2_gpio_module_write(void *opaque, hwaddr addr,
 
 static uint32_t omap2_gpio_module_readp(void *opaque, hwaddr addr)
 {
+    
     return omap2_gpio_module_read(opaque, addr & ~3) >> ((addr & 3) << 3);
 }
 
