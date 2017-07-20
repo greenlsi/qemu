@@ -137,14 +137,23 @@ static void bcm2835_peripherals_init(Object *obj)
     DBGprintf("%s", "\n");
     qdev_set_parent_bus(DEVICE(&s->gpio), sysbus_get_default());
 
-    /* ADC MAX1246 */
+    /* ADC MAX1246 
     DBGprintf("%lu, 0x%08llX\n", sizeof(s->adc), (unsigned long long)(&s->adc));
     object_initialize(&s->adc, sizeof(s->adc), TYPE_MAX1246_SPI);
     DBGprintf("%s", "\n");
     object_property_add_child(obj, "adc", OBJECT(&s->adc), NULL);
     DBGprintf("%s", "\n");
     qdev_set_parent_bus(DEVICE(&s->adc), sysbus_get_default());
+    DBGprintf("%s", "\n"); */
+
+    /* RFID MFRC522 */
+    DBGprintf("%lu, 0x%08llX\n", sizeof(s->rfid), (unsigned long long)(&s->rfid));
+    object_initialize(&s->rfid, sizeof(s->rfid), TYPE_MFRC522_SPI);
     DBGprintf("%s", "\n");
+    object_property_add_child(obj, "rfid", OBJECT(&s->rfid), NULL);
+    DBGprintf("%s", "\n");
+    qdev_set_parent_bus(DEVICE(&s->rfid), sysbus_get_default());
+    DBGprintf("%s", "\n"); 
 
 }
 
@@ -426,7 +435,7 @@ static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
     sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 3,
         qdev_get_gpio_in_named(DEVICE(&s->ic), BCM2835_IC_GPU_IRQ, INTERRUPT_GPIO3));
 
-    /* ADC MAX1246 */
+    /* ADC MAX1246 
     object_property_set_bool(OBJECT(&s->adc), true, "realized", &err);
     if (err) {
         error_propagate(errp, err);
@@ -434,11 +443,18 @@ static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
     }
 
     memory_region_add_subregion(&s->peri_mr, SPI0_OFFSET,
-                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->adc), 0));
+                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->adc), 0)); */
+
+    /* RFID MFRC522 */
+    object_property_set_bool(OBJECT(&s->rfid), true, "realized", &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+
+    memory_region_add_subregion(&s->peri_mr, SPI0_OFFSET,
+                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->rfid), 0));
     
-
-
-
 
 }
 

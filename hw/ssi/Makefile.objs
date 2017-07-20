@@ -4,8 +4,14 @@ common-obj-$(CONFIG_XILINX_SPI) += xilinx_spi.o
 common-obj-$(CONFIG_XILINX_SPIPS) += xilinx_spips.o
 common-obj-$(CONFIG_MAX1246_SPI) += max1246_spi.o
 common-obj-y += max1246_spi.o
+common-obj-$(CONFIG_MFRC522_SPI) += mfc522_adc_spi.o
+common-obj-y += mfc522_adc_spi.o
+
 
 obj-$(CONFIG_OMAP) += omap_spi.o
 
 max1246_spi.o-libs += -L/usr/local/lib -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
 max1246_spi.o-cflags += -pthread -I/usr/local/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+
+mfc522_adc_spi.o-libs += -L/usr/local/lib -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+mfc522_adc_spi.o-cflags += -pthread -I/usr/local/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
