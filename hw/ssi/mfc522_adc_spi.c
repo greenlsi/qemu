@@ -270,7 +270,7 @@ fifo_clear(mfrc522_spi_s* s)
 
 static uint64_t mfrc522_spi_read(void *opaque, hwaddr addr, unsigned size) {
 
-  struct mfrc522_spi_s *s = (struct mfrc522_spi_s *) opaque;
+  struct raspi_spi_s *s = (struct raspi_spi_s *) opaque;
 
   if (addr > DC) {//si la drireccion es mayor
     BCM2835_BAD_REG(addr);
@@ -282,9 +282,7 @@ static uint64_t mfrc522_spi_read(void *opaque, hwaddr addr, unsigned size) {
 
   switch ((unsigned int)(addr & 0xFFFFFFFFUL)) {
     case FIFO:
-      if (s->index_out_w != s->index_out_r ){
-        return s->data_out[s->index_out_r++];
-      }
+      //Add functions
     default:
       return s->registers_spi[ID(addr)];
     }
@@ -323,7 +321,38 @@ static void mfrc522_spi_write(void *opaque, hwaddr addr, uint64_t value, unsigne
         s->registers_spi[ID(CS)] |= CS_RXD;
       }
       break;
-    case FIFO:
+    case FIFO: {
+      //Add functions
+      int cs = s->registers_spi[ID(CS)] & CS_CS;
+      if (cs < 2 && s->ch[cs]) {
+        s->ch[cs]->write(s->ch[cs].opaque, value, size);
+      }
+      s->registers_spi[ID(CS)] |= CS_DONE;
+      break;
+    }
+    case CLK:
+      s->registers_spi[ID(CLK)] = value;
+      break;
+    default:
+      //g_print("Incorrect addr: 0x%08X, val: %ld, size: %d\n", (unsigned int)(addr & 0xFFFFFFFFUL), value, size);
+      break;
+  }
+}
+
+static uint64_t mfrc522_read(void *opaque, unsigned size) {
+  struct mfrc522_spi_s *s = (struct mfrc522_spi_s *) opaque;
+  if (s->index_out_w != s->index_out_r ){
+    return s->data_out[s->index_out_r++];
+  }
+  return 0;
+}
+
+static void mfc522_write(void *opaque, uint64_t value, unsigned size) {
+  struct mfrc522_spi_s *s = (struct mfrc522_spi_s *) opaque;
+  struct uid *u = &s->uid_1;
+
+  int i,j = 0;
+ 
       if (s->index_in == 0){  //First Byte Received -> Command
         s->reg = (value & 0x7E) >> 1;
         s->rw = (value & 0x80) >> 7;
@@ -466,17 +495,8 @@ static void mfrc522_spi_write(void *opaque, hwaddr addr, uint64_t value, unsigne
           //printf("Valores de indices fifo: write->%i read->%i\n", s->i_fifo_rfid_w, s->i_fifo_rfid_r);
         }
       }
-      s->registers_spi[ID(CS)] |= CS_DONE;
-      break;
-    case CLK:
-      s->registers_spi[ID(CLK)] = value;
-      break;
-    default:
-      //g_print("Incorrect addr: 0x%08X, val: %ld, size: %d\n", (unsigned int)(addr & 0xFFFFFFFFUL), value, size);
-      break;
-  }
-}
 
+}
 
 static const MemoryRegionOps mfrc522_spi_ops = {
   .read = mfrc522_spi_read,
@@ -495,6 +515,16 @@ static const VMStateDescription vmstate_rfid = {
 };
 
 
+mfrc522_spi_s mfrc_s;
+
+static spi_channel_s mfrc522_spi_ch = {
+  .init = mfrc522_init,
+  .reset = mfrc_reset,
+  .read = mfrc_read,
+  .write = mfrc_write,
+  .opaque = &mfrc_s
+};
+
 static void mfrc522_spi_init(Object *obj) {
   mfrc522_spi_s *d = MFRC522_SPI(obj);
   SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
@@ -510,6 +540,12 @@ static void mfrc522_spi_init(Object *obj) {
   sysbus_init_mmio(sbd, &d->iomem);
   DBGprintf(("\n"));
 
+  d->ch[0] = &mfrc522_spi_ch;
+  d->ch[1] = 0;
+
+  d->ch[0]->init();
+
+  //Move to mfrc_init
   d->server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "mfrc522_adc", NULL);
   soup_server_listen_all (d->server, 1800, 0, &error);
   soup_server_add_websocket_handler (d->server, NULL, NULL, NULL, server_websocket_callback, d, NULL);

@@ -233,13 +233,26 @@ typedef struct uid{
     uint8_t    sak;          // The SAK (Select acknowledge) byte returned from the PICC after successful selection.
   } uid;
 
-typedef struct mfrc522_spi_s{
+typedef struct spi_channel_s {
+      void (*reset)();
+      void (*init)();
+      void (*write)(void *opaque, uint64_t value, unsigned size);
+      uint64_t (*read)(void *opaque, unsigned size);
+      void* opaque;
+} spi_channel_s;
+ 
+
+typedef struct raspi_spi_s{
     SysBusDevice parent_obj;
 
     MemoryRegion iomem;
 
     uint32_t registers_spi[SPI_REGISTERS_LEN];
 
+    spi_channel_s* ch[2];
+} raspi_spi_s;
+
+typedef struct mfrc522_spi_s{
     SoupServer *server;
     SoupWebsocketConnection* connection;
 
@@ -271,12 +284,6 @@ typedef struct mfrc522_spi_s{
 } mfrc522_spi_s;
 
 typedef struct max1246_spi_s{
-    SysBusDevice parent_obj;
-
-    MemoryRegion iomem;
-
-    uint32_t registers[SPI_REGISTERS_LEN];
-
     SoupServer *server;
     SoupWebsocketConnection* connection;
 
