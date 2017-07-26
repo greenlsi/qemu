@@ -10,6 +10,9 @@
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
 
+#define TYPE_SPI_DEVICE "mfrc522"
+#define SPI_DEVICE(obj)      OBJECT_CHECK(raspi_spi_s, (obj), TYPE_SPI_DEVICE)
+
 #define TYPE_MFRC522_SPI "mfrc522"
 #define MFRC522_SPI(obj)      OBJECT_CHECK(mfrc522_spi_s, (obj), TYPE_MFRC522_SPI)
 

@@ -60,7 +60,8 @@ typedef struct BCM2835PeripheralState {
     BCM2835UsbState usb;
     bcm2835_gpif_s gpio;
     //max1246_spi_s adc;
-    mfrc522_spi_s rfid;
+    //mfrc522_spi_s rfid;
+    raspi_spi_s spi;
 } BCM2835PeripheralState;
 
 #endif /* BCM2835_PERIPHERALS_H */

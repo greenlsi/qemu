@@ -146,14 +146,23 @@ static void bcm2835_peripherals_init(Object *obj)
     qdev_set_parent_bus(DEVICE(&s->adc), sysbus_get_default());
     DBGprintf("%s", "\n"); */
 
-    /* RFID MFRC522 */
+    /* RFID MFRC522 
     DBGprintf("%lu, 0x%08llX\n", sizeof(s->rfid), (unsigned long long)(&s->rfid));
     object_initialize(&s->rfid, sizeof(s->rfid), TYPE_MFRC522_SPI);
     DBGprintf("%s", "\n");
     object_property_add_child(obj, "rfid", OBJECT(&s->rfid), NULL);
     DBGprintf("%s", "\n");
     qdev_set_parent_bus(DEVICE(&s->rfid), sysbus_get_default());
-    DBGprintf("%s", "\n"); 
+    DBGprintf("%s", "\n"); */
+
+    /* SPI */
+    DBGprintf("%lu, 0x%08llX\n", sizeof(s->spi), (unsigned long long)(&s->spi));
+    object_initialize(&s->spi, sizeof(s->spi), TYPE_SPI_DEVICE);
+    DBGprintf("%s", "\n");
+    object_property_add_child(obj, "spi", OBJECT(&s->spi), NULL);
+    DBGprintf("%s", "\n");
+    qdev_set_parent_bus(DEVICE(&s->spi), sysbus_get_default());
+    DBGprintf("%s", "\n");
 
 }
 
@@ -445,7 +454,7 @@ static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
     memory_region_add_subregion(&s->peri_mr, SPI0_OFFSET,
                 sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->adc), 0)); */
 
-    /* RFID MFRC522 */
+    /* RFID MFRC522 
     object_property_set_bool(OBJECT(&s->rfid), true, "realized", &err);
     if (err) {
         error_propagate(errp, err);
@@ -453,7 +462,17 @@ static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
     }
 
     memory_region_add_subregion(&s->peri_mr, SPI0_OFFSET,
-                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->rfid), 0));
+                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->rfid), 0)); */
+
+    /* SPI */
+    object_property_set_bool(OBJECT(&s->spi), true, "realized", &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+
+    memory_region_add_subregion(&s->peri_mr, SPI0_OFFSET,
+                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->spi), 0));
     
 
 }
