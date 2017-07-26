@@ -16,6 +16,8 @@
 #define SPI_REGISTERS_LEN (0x0018/4)
 #define ID(a) (a/sizeof(uint32_t))
 
+#define BCM2835_BAD_REG(addr) \
+   return 0;
 
 // Register masks for SPI0_CS
 #define CS_LEN_LONG             0x02000000 ///< Enable Long data word in Lossi mode if DMA_LEN is set
@@ -53,46 +55,6 @@ DLEN          = 0x000c, /*!< SPI Master Data Length */
 LTOH          = 0x0010, /*!< SPI LOSSI mode TOH */
 DC            = 0x0014, /*!< SPI DMA DREQ Controls */
 } SPIRegisters;
-
-
-#define TYPE_MAX1246_SPI "bcm2835-adc"
-#define MAX1246_SPI(obj)      OBJECT_CHECK(max1246_spi_s, (obj), TYPE_MAX1246_SPI)
-
-#define BCM2835_BAD_REG(addr) \
-   return 0;
-
-// Register masks for first byte of data_in
-#define START                   0x80 // The first logic '1' bit afer CS goes low defines the beginning of the control byte
-#define SEL2                    0x40 // Select which of the four channels are used for the conversion
-#define SEL1                    0x20 // Select which of the four channels are used for the conversion
-#define SEL0                    0x10 // Select which of the four channels are used for the conversion 
-#define UNI_BIP                 0x08 // 1 = Unipolar, 0= Bipolar
-#define SGL_DIF                 0x04 // 1 = Single ended, 0 =Differential
-#define PD1                     0x02 // Selects clock and power-down modes
-#define PD0                     0x01 // Selects clock and power-down modes
-
-#define SEL_MASK                0x70
-#define PD_MASK                 0x03
-
-#define CH0                     0x10 // Input Data for channel 0
-#define CH1                     0x50 // Input Data for channel 1
-#define CH2                     0x20 // Input Data for channel 2
-#define CH3                     0x60 // Input Data for channel 3
-#define DIFF1                   0x10 // Differential input 1
-#define DIFF2                   0x20 // Differential input 2
-#define DIFF3                   0x50 // Differential input 3
-#define DIFF4                   0x60 // Differential input 4
-
-
-#define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
-
-#define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
 
 
 #define RFID_REGISTERS_LEN 0x40
@@ -206,26 +168,6 @@ typedef enum {
 // The PICC_CMD_MF_READ and PICC_CMD_MF_WRITE can also be used for MIFARE Ultralight.
 #define PICC_CMD_UL_WRITE         0xA2    // Writes one 4 byte page to the PICC.
 
-/*
-// State Machine Structs
-typedef struct fsm_t fsm_t;
-
-typedef int (*fsm_input_func_t) (fsm_t*);
-typedef void (*fsm_output_func_t) (fsm_t*);
-
-typedef struct fsm_trans_t {
-  int orig_state;
-  fsm_input_func_t in;
-  int dest_state;
-  fsm_output_func_t out;
-} fsm_trans_t;
-
-struct fsm_t {
-  int current_state;
-  fsm_trans_t* tt;
-  void* user_data;
-};
-*/
 
 typedef struct uid{
     uint8_t    size;         // Number of bytes in the UID. 4, 7 or 10.
@@ -269,27 +211,6 @@ typedef struct mfrc522_spi_s{
     //qemu_irq irq;
 
 } mfrc522_spi_s;
-
-typedef struct max1246_spi_s{
-    SysBusDevice parent_obj;
-
-    MemoryRegion iomem;
-
-    uint32_t registers[SPI_REGISTERS_LEN];
-
-    SoupServer *server;
-    SoupWebsocketConnection* connection;
-
-    uint32_t data_in;
-    uint32_t data_out;
-    int index_in;
-    int index_out;
-    float CHX[4];
-    int ch;
-    //qemu_irq irq;
-
-} max1246_spi_s;
-
 
 #endif
 

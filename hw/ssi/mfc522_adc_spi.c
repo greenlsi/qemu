@@ -64,7 +64,7 @@ rx_message (SoupWebsocketConnection *self,
   u->size = 4;
 
   guint eq = 0;
-  s->read_done = 0;
+  
 
   if (s->card_present){
     for (i=0; i<4; i++){
@@ -77,6 +77,7 @@ rx_message (SoupWebsocketConnection *self,
         u->uidByte[i] = 0x00;
       }
       s->card_present = 0;
+      s->read_done = 0;
     }
   } else {
     if (msg->data[8] == 1){
@@ -86,6 +87,8 @@ rx_message (SoupWebsocketConnection *self,
       s->card_present = 1;
     }
   }
+
+
 
   //g_print("Card present: %i \nUID: %02X%02X%02X%02X", s->card_present, u->uidByte[0], u->uidByte[1], u->uidByte[2], u->uidByte[3]);
 
